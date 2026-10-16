@@ -81,6 +81,7 @@
       var name = document.getElementById('fName').value.trim();
       var email = document.getElementById('fEmail').value.trim();
       var msg = document.getElementById('fMsg').value.trim();
+      var autoresp = form.querySelector('input[name="_autoresponse"]');
       if (!name || !email || !msg) {
         note.textContent = 'Please fill in your name, email and message.';
         note.className = 'form-note err';
@@ -94,7 +95,13 @@
       fetch('https://formsubmit.co/ajax/aminashehzadi393@gmail.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name: name, email: email, message: msg, _subject: 'Portfolio contact: ' + name })
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          message: msg,
+          _subject: 'Portfolio contact: ' + name,
+          _autoresponse: autoresp ? autoresp.value : ''
+        })
       }).then(function (r) { return r.json(); })
         .then(function () {
           note.textContent = 'Message sent! I will get back to you soon.';
