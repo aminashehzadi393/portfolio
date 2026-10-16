@@ -1,66 +1,179 @@
-/* ============================================================
-   Amina Shehzadi — Portfolio
-   Vanilla JS: 3D hero, tilt, scrollspy, reveal, form, utilities
-   ============================================================ */
+/* Shared behavior: page fade, nav, reveals, 3D hero, form, copy email, to-top. */
 (function () {
   'use strict';
 
-  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Page fade-in
+  document.addEventListener('DOMContentLoaded', function () {
+    document.body.classList.add('loaded');
+  });
 
-  /* ---------- 1. Three.js hero background ---------- */
-  function initHeroScene() {
-    var canvas = document.getElementById('hero-canvas');
-    if (!canvas || prefersReducedMotion) return;
-    if (typeof THREE === 'undefined') return; // CDN failed — degrade gracefully
+  // Mobile menu
+  var burger = document.getElementById('burger');
+  var navLinks = document.getElementById('navLinks');
+  if (burger && navLinks) {
+    burger.addEventListener('click', function () {
+      navLinks.classList.toggle('open');
+    });
+    navLinks.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { navLinks.classList.remove('open'); });
+    });
+  }
 
-    var renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    } catch (e) { return; }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  // Scroll reveal
+  var revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealEls.length) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('visible'); });
+  }
 
+  // Back to top
+  var toTop = document.getElementById('toTop');
+  if (toTop) {
+    window.addEventListener('scroll', function () {
+      toTop.classList.toggle('show', window.scrollY > 500);
+    }, { passive: true });
+    toTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // Footer year
+  var yr = document.getElementById('year');
+  if (yr) yr.textContent = new Date().getFullYear();
+
+  // Copy email
+  var copyBtn = document.getElementById('copyEmail');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      var email = copyBtn.getAttribute('data-email') || 'aminashehzadi393@gmail.com';
+      function done() {
+        var old = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function () { copyBtn.textContent = old; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(done).catch(function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var t = document.createElement('textarea');
+        t.value = email;
+        document.body.appendChild(t);
+        t.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(t);
+        done();
+      }
+    });
+  }
+
+  // Contact form via formsubmit AJAX
+  var form = document.getElementById('contactForm');
+  if (form) {
+    var note = document.getElementById('formNote');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var name = document.getElementById('fName').value.trim();
+      var email = document.getElementById('fEmail').value.trim();
+      var msg = document.getElementById('fMsg').value.trim();
+      if (!name || !email || !msg) {
+        note.textContent = 'Please fill in your name, email and message.';
+        note.className = 'form-note err';
+        return;
+      }
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      note.textContent = '';
+      note.className = 'form-note';
+      fetch('https://formsubmit.co/ajax/aminashehzadi393@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, message: msg, _subject: 'Portfolio contact: ' + name })
+      }).then(function (r) { return r.json(); })
+        .then(function () {
+          note.textContent = 'Message sent! I will get back to you soon.';
+          note.className = 'form-note ok';
+          form.reset();
+        })
+        .catch(function () {
+          note.textContent = 'Something went wrong. Please email me directly at aminashehzadi393@gmail.com.';
+          note.className = 'form-note err';
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+        });
+    });
+  }
+
+  // Three.js neural-network hero (home page only)
+  var canvas = document.getElementById('hero-canvas');
+  if (canvas && typeof THREE !== 'undefined' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try { initHero(canvas); } catch (e) { /* graceful: static hero remains */ }
+  }
+
+  function initHero(canvas) {
+    var hero = canvas.closest('.hero');
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-    camera.position.z = 7;
+    camera.position.z = 26;
 
-    // Particle field
-    var COUNT = 450;
-    var positions = new Float32Array(COUNT * 3);
-    for (var i = 0; i < COUNT; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 16;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+    var N = 90;
+    var positions = new Float32Array(N * 3);
+    var velocities = [];
+    for (var i = 0; i < N; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 44;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 26;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      velocities.push({
+        x: (Math.random() - 0.5) * 0.02,
+        y: (Math.random() - 0.5) * 0.02,
+        z: (Math.random() - 0.5) * 0.01
+      });
     }
     var geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    var mat = new THREE.PointsMaterial({
-      color: 0x34d399, size: 0.035, transparent: true, opacity: 0.5,
-      blending: THREE.AdditiveBlending, depthWrite: false
-    });
-    var particles = new THREE.Points(geo, mat);
-    scene.add(particles);
+    var mat = new THREE.PointsMaterial({ color: 0x22d3ee, size: 0.22, transparent: true, opacity: 0.9 });
+    var points = new THREE.Points(geo, mat);
+    scene.add(points);
 
-    // Floating wireframe shapes — slow, elegant
-    var shapes = [];
-    var shapeGeos = [
-      new THREE.IcosahedronGeometry(1.1, 0),
-      new THREE.OctahedronGeometry(0.9, 0),
-      new THREE.TetrahedronGeometry(1.0, 0)
-    ];
-    var shapePos = [[-4.2, 1.4, -1.5], [4.4, -1.2, -2], [0.4, 2.4, -3]];
-    for (var s = 0; s < shapeGeos.length; s++) {
-      var mesh = new THREE.Mesh(shapeGeos[s], new THREE.MeshBasicMaterial({
-        color: 0x34d399, wireframe: true, transparent: true, opacity: 0.10
-      }));
-      mesh.position.set(shapePos[s][0], shapePos[s][1], shapePos[s][2]);
-      mesh.userData = { rx: 0.0012 + s * 0.0006, ry: 0.0018 + s * 0.0004, baseY: shapePos[s][1], ph: s * 2.1 };
-      scene.add(mesh);
-      shapes.push(mesh);
+    var lineGeo = new THREE.BufferGeometry();
+    var linePos = new Float32Array(N * N * 6);
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
+    var lineMat = new THREE.LineBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.14 });
+    var lines = new THREE.LineSegments(lineGeo, lineMat);
+    scene.add(lines);
+
+    // Amber accent nodes
+    var accentGeo = new THREE.BufferGeometry();
+    var AN = 14;
+    var aPos = new Float32Array(AN * 3);
+    for (var j = 0; j < AN; j++) {
+      aPos[j * 3] = (Math.random() - 0.5) * 36;
+      aPos[j * 3 + 1] = (Math.random() - 0.5) * 22;
+      aPos[j * 3 + 2] = (Math.random() - 0.5) * 14;
     }
+    accentGeo.setAttribute('position', new THREE.BufferAttribute(aPos, 3));
+    var accent = new THREE.Points(accentGeo, new THREE.PointsMaterial({ color: 0xfbbf24, size: 0.34, transparent: true, opacity: 0.95 }));
+    scene.add(accent);
+
+    var mouseX = 0, mouseY = 0;
+    window.addEventListener('mousemove', function (e) {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    }, { passive: true });
 
     function resize() {
-      var w = canvas.clientWidth || window.innerWidth;
-      var h = canvas.clientHeight || window.innerHeight;
+      var w = hero.clientWidth, h = hero.clientHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -69,258 +182,66 @@
     window.addEventListener('resize', resize);
 
     var running = true;
-    var heroVisible = true;
-
-    // Pause when tab hidden or hero off-screen (perf)
     document.addEventListener('visibilitychange', function () {
-      running = !document.hidden && heroVisible;
-      if (running) requestAnimationFrame(tick);
+      running = !document.hidden;
+      if (running) animate();
     });
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
-        heroVisible = entries[0].isIntersecting;
-        var shouldRun = !document.hidden && heroVisible;
-        if (shouldRun && !running) { running = true; requestAnimationFrame(tick); }
-        else if (!shouldRun) { running = false; }
-      }).observe(document.getElementById('home'));
+        var vis = entries[0].isIntersecting;
+        if (vis && !running) { running = true; animate(); }
+        else if (!vis) { running = false; }
+      }).observe(hero);
     }
 
-    var mouseX = 0, mouseY = 0;
-    window.addEventListener('mousemove', function (e) {
-      mouseX = (e.clientX / window.innerWidth - 0.5) * 0.6;
-      mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
-    }, { passive: true });
-
-    var t = 0;
-    function tick() {
+    var LINK_DIST = 7;
+    function animate() {
       if (!running) return;
-      t += 0.008;
-      particles.rotation.y += 0.0006;
-      particles.rotation.x = mouseY * 0.15;
-      for (var k = 0; k < shapes.length; k++) {
-        var m = shapes[k];
-        m.rotation.x += m.userData.rx;
-        m.rotation.y += m.userData.ry;
-        m.position.y = m.userData.baseY + Math.sin(t + m.userData.ph) * 0.25;
+      requestAnimationFrame(animate);
+      var p = geo.attributes.position.array;
+      for (var i = 0; i < N; i++) {
+        p[i * 3] += velocities[i].x;
+        p[i * 3 + 1] += velocities[i].y;
+        p[i * 3 + 2] += velocities[i].z;
+        if (p[i * 3] > 22 || p[i * 3] < -22) velocities[i].x *= -1;
+        if (p[i * 3 + 1] > 13 || p[i * 3 + 1] < -13) velocities[i].y *= -1;
+        if (p[i * 3 + 2] > 10 || p[i * 3 + 2] < -10) velocities[i].z *= -1;
       }
-      camera.position.x += (mouseX - camera.position.x) * 0.03;
-      camera.position.y += (-mouseY - camera.position.y) * 0.03;
+      geo.attributes.position.needsUpdate = true;
+
+      var lp = lineGeo.attributes.position.array;
+      var k = 0;
+      for (var a = 0; a < N; a++) {
+        for (var b = a + 1; b < N; b++) {
+          var dx = p[a * 3] - p[b * 3], dy = p[a * 3 + 1] - p[b * 3 + 1], dz = p[a * 3 + 2] - p[b * 3 + 2];
+          if (dx * dx + dy * dy + dz * dz < LINK_DIST * LINK_DIST) {
+            lp[k++] = p[a * 3]; lp[k++] = p[a * 3 + 1]; lp[k++] = p[a * 3 + 2];
+            lp[k++] = p[b * 3]; lp[k++] = p[b * 3 + 1]; lp[k++] = p[b * 3 + 2];
+          }
+        }
+      }
+      lineGeo.setDrawRange(0, k / 3);
+      lineGeo.attributes.position.needsUpdate = true;
+
+      accent.rotation.y += 0.0009;
+      camera.position.x += (mouseX * 2.5 - camera.position.x) * 0.03;
+      camera.position.y += (-mouseY * 1.5 - camera.position.y) * 0.03;
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
-      requestAnimationFrame(tick);
     }
-    tick();
+    animate();
   }
 
-  /* ---------- 2. Mobile menu ---------- */
-  function initMenu() {
-    var btn = document.getElementById('hamburger');
-    var links = document.getElementById('nav-links');
-    if (!btn || !links) return;
-    btn.addEventListener('click', function () {
-      var open = links.classList.toggle('open');
-      btn.classList.toggle('open', open);
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    });
-    links.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () {
-        links.classList.remove('open');
-        btn.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
+  // Subtle card lift (pointer devices only)
+  if (window.matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.card').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = 'translateY(-5px) rotateX(' + (-y * 4) + 'deg) rotateY(' + (x * 4) + 'deg)';
       });
+      card.addEventListener('mouseleave', function () { card.style.transform = ''; });
     });
   }
-
-  /* ---------- 3. Navbar scrolled state ---------- */
-  function initNavbar() {
-    var nav = document.getElementById('navbar');
-    if (!nav) return;
-    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 10); }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  }
-
-  /* ---------- 4. Scrollspy ---------- */
-  function initScrollspy() {
-    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));
-    if (!links.length || !('IntersectionObserver' in window)) return;
-    var map = {};
-    links.forEach(function (l) { map[l.getAttribute('href').slice(1)] = l; });
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          links.forEach(function (l) { l.classList.remove('active'); });
-          var link = map[en.target.id];
-          if (link) link.classList.add('active');
-        }
-      });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    Object.keys(map).forEach(function (id) {
-      var sec = document.getElementById(id);
-      if (sec) obs.observe(sec);
-    });
-  }
-
-  /* ---------- 5. Scroll reveal ---------- */
-  function initReveal() {
-    var els = document.querySelectorAll('.reveal');
-    if (!('IntersectionObserver' in window) || prefersReducedMotion) {
-      els.forEach(function (el) { el.classList.add('visible'); });
-      return;
-    }
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          en.target.classList.add('visible');
-          obs.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    els.forEach(function (el) { obs.observe(el); });
-  }
-
-  /* ---------- 6. 3D tilt on showcase visuals ---------- */
-  function initTilt() {
-    if (prefersReducedMotion) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    document.querySelectorAll('.tilt').forEach(function (el) {
-      var raf = null;
-      el.addEventListener('mousemove', function (e) {
-        var r = el.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        if (raf) cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(function () {
-          el.style.transform =
-            'rotateY(' + (px * 10).toFixed(2) + 'deg) rotateX(' + (-py * 10).toFixed(2) + 'deg) translateZ(8px)';
-        });
-      });
-      el.addEventListener('mouseleave', function () {
-        if (raf) cancelAnimationFrame(raf);
-        el.style.transform = 'rotateY(0deg) rotateX(0deg) translateZ(0)';
-      });
-    });
-  }
-
-  /* ---------- 7. Contact form (formsubmit AJAX) ---------- */
-  function initForm() {
-    var form = document.getElementById('contact-form');
-    if (!form) return;
-    var name = document.getElementById('form-name');
-    var email = document.getElementById('form-email');
-    var message = document.getElementById('form-message');
-    var status = document.getElementById('form-status');
-    var submit = document.getElementById('form-submit');
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      status.textContent = '';
-      status.className = '';
-
-      var n = name.value.trim(), em = email.value.trim(), msg = message.value.trim();
-      if (!n || !em || !msg) {
-        status.textContent = 'Please fill in all fields.';
-        status.className = 'error';
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
-        status.textContent = 'Please enter a valid email address.';
-        status.className = 'error';
-        return;
-      }
-
-      submit.disabled = true;
-      submit.textContent = 'Sending…';
-
-      fetch('https://formsubmit.co/aminashehzadi393@gmail.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          name: n, email: em, message: msg,
-          _subject: 'Portfolio contact: ' + n,
-          _template: 'table'
-        })
-      })
-        .then(function (res) {
-          if (!res.ok) throw new Error('bad response');
-          return res.json();
-        })
-        .then(function () {
-          status.textContent = 'Message sent — thank you! I\'ll get back to you soon.';
-          status.className = 'success';
-          form.reset();
-        })
-        .catch(function () {
-          status.textContent = 'Something went wrong. Please email me directly at aminashehzadi393@gmail.com.';
-          status.className = 'error';
-        })
-        .finally(function () {
-          submit.disabled = false;
-          submit.textContent = 'Send Message';
-        });
-    });
-  }
-
-  /* ---------- 8. Copy email ---------- */
-  function initCopyEmail() {
-    var btn = document.getElementById('copy-email');
-    var text = document.getElementById('email-text');
-    if (!btn || !text) return;
-    btn.addEventListener('click', function () {
-      var value = text.textContent.trim();
-      function done() {
-        btn.textContent = 'Copied';
-        btn.classList.add('copied');
-        setTimeout(function () {
-          btn.textContent = 'Copy';
-          btn.classList.remove('copied');
-        }, 2000);
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(value).then(done).catch(function () { fallback(); });
-      } else { fallback(); }
-      function fallback() {
-        var ta = document.createElement('textarea');
-        ta.value = value;
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        document.body.removeChild(ta);
-        done();
-      }
-    });
-  }
-
-  /* ---------- 9. Back to top ---------- */
-  function initBackToTop() {
-    var btn = document.getElementById('back-to-top');
-    if (!btn) return;
-    window.addEventListener('scroll', function () {
-      btn.classList.toggle('show', window.scrollY > 600);
-    }, { passive: true });
-    btn.addEventListener('click', function () {
-      window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-    });
-  }
-
-  /* ---------- 10. Footer year ---------- */
-  function initYear() {
-    var y = document.getElementById('year');
-    if (y) y.textContent = new Date().getFullYear();
-  }
-
-  /* ---------- boot ---------- */
-  document.addEventListener('DOMContentLoaded', function () {
-    initHeroScene();
-    initMenu();
-    initNavbar();
-    initScrollspy();
-    initReveal();
-    initTilt();
-    initForm();
-    initCopyEmail();
-    initBackToTop();
-    initYear();
-  });
 })();
