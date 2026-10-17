@@ -23,6 +23,11 @@
       reply: 'RankCheck is a free SEO analyzer that scores any page 0\u2013100 across 15 on-page checks. It hit 100/100 on PageSpeed SEO. Try it: ' + link('https://aminashehzadi393.github.io/seo-analyzer/', 'live demo')
     },
     {
+      name: 'seo_skp',
+      patterns: [/seo[_ -]?skp/i, /readiness/i, /\baeo\b/i, /\bgeo\b/i, /website\s*(audit|checkup|scan|health)/i, /mini\s*audit/i, /instant\s*checkup/i],
+      reply: 'She co-built <b>SEO_skp</b>, a full-stack website readiness auditor (FastAPI + React) that scores sites on SEO, AEO and GEO with PDF reports: ' + link('https://github.com/drwasimahmadkhan/SEO_skp', 'GitHub') + '. You can also run the free 13-point <a href="index.html#checkup">Instant Checkup</a> right on her homepage.'
+    },
+    {
       name: 'foodexpress',
       patterns: [/foodexpress/i, /food\s*delivery/i],
       reply: 'FoodExpress is a responsive food delivery website with menu search and filters, a cart, and a checkout flow. See it: ' + link('https://aminashehzadi393.github.io/Food-delivery-project/', 'live demo')
@@ -50,7 +55,7 @@
     {
       name: 'hire',
       patterns: [/hire/i, /availab/i, /freelance/i, /collaborat/i, /opportunit/i, /job/i, /work with/i, /project for me/i],
-      reply: 'Yes! She is open to freelance builds, collaborations, and AI projects. The fastest way is the <a href="contact.html">contact form</a> or emailing ' + EMAIL + '.'
+      reply: 'Yes! She is open to <b>free audits, SEO campaigns, and website builds</b>. The fastest way is the <a href="contact.html">contact form</a> or emailing ' + EMAIL + '.'
     },
     {
       name: 'education',
@@ -60,22 +65,27 @@
     {
       name: 'experience',
       patterns: [/experience/i, /intern/i, /worked/i, /work history/i, /career/i, /corvit/i, /devxui/i],
-      reply: 'She has been a <b>Freelance AI & Web Developer since 2024</b> (4 live projects, client SEO work), was a UI/UX Intern at devxui, Bangladesh (Nov\u2013Dec 2025), and an SEO Trainee at Corvit Systems, Lahore (Feb\u2013May 2025).'
+      reply: 'She has been a <b>Freelance SEO &amp; Web Developer since 2024</b> (live client campaigns + 3 shipped sites), was a UI/UX Intern at devxui, Bangladesh (Nov\u2013Dec 2025), and an SEO Trainee at Corvit Systems, Lahore (Feb\u2013May 2025).'
     },
     {
       name: 'skills',
       patterns: [/skill/i, /\bstack\b/i, /technolog/i, /expert/i, /good at/i, /know/i],
-      reply: 'Her main stack is <b>AI/LLM</b>: Python, Prompt Engineering, RAG, AI Agents (deep-diving into PyTorch & fine-tuning). Supporting skills: HTML/CSS/JS, WordPress, and on-page/off-page/technical SEO.'
+      reply: 'Her core stack is <b>SEO</b>: technical SEO, on-page &amp; content optimization, off-page link building, keyword research, and GEO/AEO for AI visibility. Supporting: HTML/CSS/JS, WordPress, PageSpeed performance, and audit tooling (RankCheck, SEO_skp).'
     },
     {
       name: 'llm',
-      patterns: [/\bllm\b/i, /\bai\b/i, /model training/i, /fine[- ]tun/i, /pytorch/i, /\brag\b/i, /machine learning/i, /artificial intelligence/i, /agent/i],
-      reply: 'LLM engineering & model training is her main focus \u2014 she is deep-diving into PyTorch, RAG, AI agents, and fine-tuning. Her public roadmap: ' + link('https://github.com/aminashehzadi393/llm-engineering', 'GitHub') + '.'
+      patterns: [/\bllm\b/i, /model training/i, /fine[- ]tun/i, /pytorch/i, /\brag\b/i, /machine learning/i, /artificial intelligence/i, /chat\s*gp?t?\b/i],
+      reply: 'Her AI-related focus is <b>GEO &amp; AEO</b> \u2014 making websites understandable and citable by AI assistants (schema, structured answers, entity signals). She also co-built <b>SEO_skp</b>, which scores how AI-ready any site is. SEO_skp: ' + link('https://github.com/drwasimahmadkhan/SEO_skp', 'GitHub') + '.'
+    },
+    {
+      name: 'geoseo',
+      patterns: [/\bgeo\b/i, /\baeo\b/i, /answerabilit/i, /ai\s*visibility/i],
+      reply: '<b>GEO/AEO</b> = Generative &amp; Answer Engine Optimization: getting your business quoted inside AI answers (ChatGPT, Perplexity, AI Overviews). Amina optimizes schema, answer structure and entity signals for exactly this \u2014 it is one of her three service pillars on the homepage.'
     },
     {
       name: 'seo',
       patterns: [/\bseo\b/i, /search engine/i, /rank/i, /keyword/i, /backlink/i],
-      reply: 'SEO is one of her supporting skills: on-page, off-page, and technical SEO plus keyword research and site performance \u2014 she even built her own SEO analyzer, RankCheck.'
+      reply: 'SEO is her <b>core specialty</b>: technical SEO, on-page &amp; content optimization, off-page link building, keyword research &mdash; plus GEO/AEO so AI assistants cite your site. Her own tool RankCheck scores 100/100 on PageSpeed SEO: ' + link('https://aminashehzadi393.github.io/seo-analyzer/', 'try it')
     },
     {
       name: 'webdev',
@@ -85,12 +95,12 @@
     {
       name: 'projects',
       patterns: [/project/i, /portfolio/i, /built/i, /work/i, /\bapps?\b/i],
-      reply: 'She has shipped 4 projects: <b>RankCheck</b> (SEO analyzer), <b>FoodExpress</b> (food delivery app), <b>PaperMaker</b> (test paper generator) \u2014 all live \u2014 plus her public <b>LLM Engineering Roadmap</b>. Ask me about any of them!'
+      reply: 'Her SEO work: <b>RankCheck</b> (live SEO analyzer), <b>Client SEO Campaigns</b> (Toronto Airport Limo Taxi, ARKYC), <b>SEO_skp</b> (full audit platform), plus SEO-optimized sites like FoodExpress and PaperMaker. Ask me about any of them!'
     },
     {
       name: 'about',
       patterns: [/who is/i, /about/i, /introduce/i, /tell me about (her|amina)/i, /\bher\b.*\b(name|intro)/i],
-      reply: '<b>Amina Shehzadi</b> is an LLM Engineer specializing in AI and model training, with supporting expertise in web development and SEO. She learns in public and ships real projects.'
+      reply: '<b>Amina Shehzadi</b> is an <b>SEO Expert &amp; Web Developer</b> \u2014 technical, on-page and off-page SEO, GEO/AEO visibility, and fast WordPress/HTML/CSS/JS builds. Her own portfolio scores 100/100 on PageSpeed SEO and she ships real, ranked work.'
     },
     {
       name: 'thanks',
