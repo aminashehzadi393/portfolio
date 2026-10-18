@@ -20,7 +20,12 @@
     {
       name: 'rankcheck',
       patterns: [/rankcheck/i, /seo\s*analyzer/i],
-      reply: 'RankCheck is a free SEO analyzer that scores any page 0\u2013100 across 15 on-page checks. It hit 100/100 on PageSpeed SEO. Try it: ' + link('https://aminashehzadi393.github.io/seo-analyzer/', 'live demo')
+      reply: 'Her <b>SEO Analyzer</b> is built right into this portfolio — enter any page URL and get an instant 15-point score: <a href="analyzer.html">open the analyzer</a>. Same rules her own site passes at 100/100 PageSpeed SEO.'
+    },
+    {
+      name: 'analyzer',
+      patterns: [/analy[sz]er/i, /rank\s*check/i, /score.*page/i, /\bseo tool\b/i],
+      reply: 'Open her built-in <a href="analyzer.html">Free SEO Analyzer</a> — just enter a page URL and it fetches, parses and scores it live: meta tags, headings, content depth, images, links, schema and AI-readiness.'
     },
     {
       name: 'seo_skp',
@@ -50,7 +55,7 @@
     {
       name: 'contact',
       patterns: [/contact/i, /\bemail\b/i, /phone/i, /number/i, /whatsapp/i, /reach/i, /linkedin/i, /\bgithub\b/i, /social/i],
-      reply: 'You can reach her at <a href="mailto:' + EMAIL + '">' + EMAIL + '</a> or +92 334 5754865. Also on ' + link(LINKEDIN, 'LinkedIn') + ' and ' + link(GITHUB, 'GitHub') + '.'
+      reply: 'You can reach her at <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>. Also on ' + link(LINKEDIN, 'LinkedIn') + ' and ' + link(GITHUB, 'GitHub') + ' — or use the <a href="contact.html">contact form</a>.'
     },
     {
       name: 'hire',

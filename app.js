@@ -1,45 +1,38 @@
-/* Shared behavior: page fade, nav, reveals, 3D hero, stack layers,
-   multi-depth 3D project cards, counters, form, copy email, to-top. */
+/* Shared behavior for the light-glass 3D design:
+   page load, mobile menu, reveals, scroll progress, counters,
+   tilt engine, three.js daylight studio, instant checkup,
+   contact form, copy email, back-to-top. */
 (function () {
   'use strict';
 
-  // Page fade-in
   document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('loaded');
   });
 
-  // Theme toggle (dark <-> light), persisted in localStorage
-  var themeBtn = document.getElementById('themeToggle');
-  var themeRoot = document.documentElement;
-  try {
-    if (localStorage.getItem('amina-theme') === 'light') themeRoot.setAttribute('data-theme', 'light');
-  } catch (e) {}
-  function updateToggleIcon() {
-    if (!themeBtn) return;
-    var light = themeRoot.getAttribute('data-theme') === 'light';
-    themeBtn.textContent = light ? '\u263D' : '\u2600';
-    themeBtn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+  // Theme persistence is unused in the light-only design; safe no-op cleanup
+  try { localStorage.removeItem('amina-theme'); } catch (e) {}
+
+  // Scroll progress bar
+  var bar = document.getElementById('scrollProgress');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'scrollProgress';
+    document.body.appendChild(bar);
   }
-  if (themeBtn) {
-    updateToggleIcon();
-    themeBtn.addEventListener('click', function () {
-      var light = themeRoot.getAttribute('data-theme') === 'light';
-      if (light) themeRoot.removeAttribute('data-theme');
-      else themeRoot.setAttribute('data-theme', 'light');
-      try { localStorage.setItem('amina-theme', light ? 'dark' : 'light'); } catch (e) {}
-      updateToggleIcon();
-    });
-  }
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+  }, { passive: true });
 
   // Mobile menu
   var burger = document.getElementById('burger');
   var navLinks = document.getElementById('navLinks');
   if (burger && navLinks) {
     burger.addEventListener('click', function () {
-      navLinks.classList.toggle('open');
+      navLinks.classList.toggle('hidden');
     });
     navLinks.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () { navLinks.classList.remove('open'); });
+      a.addEventListener('click', function () { navLinks.classList.add('hidden'); });
     });
   }
 
@@ -48,12 +41,12 @@
   if ('IntersectionObserver' in window && revealEls.length) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
       });
     }, { threshold: 0.12 });
     revealEls.forEach(function (el) { io.observe(el); });
   } else {
-    revealEls.forEach(function (el) { el.classList.add('visible'); });
+    revealEls.forEach(function (el) { el.classList.add('is-in'); });
   }
 
   // Back to top
@@ -115,7 +108,6 @@
       btn.disabled = true;
       btn.textContent = 'Sending…';
       note.textContent = '';
-      note.className = 'form-note';
       fetch('https://formsubmit.co/ajax/aminashehzadi393@gmail.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -138,7 +130,7 @@
         })
         .finally(function () {
           btn.disabled = false;
-          btn.textContent = 'Send Message';
+          btn.textContent = 'Send Project Brief';
         });
     });
   }
@@ -165,7 +157,187 @@
     counters.forEach(function (el) { cio.observe(el); });
   }
 
-  // Instant Website Checkup — client-side mini audit (the on-page lead hook)
+  // Extreme 3D card tilt + dynamic shadow shift (reference engine)
+  if (window.matchMedia('(pointer: fine)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.card-3d-light').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+        var rotateX = ((y - centerY) / centerY) * -10;
+        var rotateY = ((x - centerX) / centerX) * 10;
+        var shadowX = ((x - centerX) / centerX) * -22;
+        var shadowY = ((y - centerY) / centerY) * -22 + 30;
+        card.style.transform = 'rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.02, 1.02, 1.02)';
+        card.style.setProperty('--mouse-x', x + 'px');
+        card.style.setProperty('--mouse-y', y + 'px');
+        card.style.setProperty('--shadow-x', shadowX + 'px');
+        card.style.setProperty('--shadow-y', shadowY + 'px');
+      });
+      card.addEventListener('mouseleave', function () {
+        card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        card.style.setProperty('--shadow-x', '0px');
+        card.style.setProperty('--shadow-y', '35px');
+      });
+    });
+  }
+
+  // ---------- Three.js daylight 3D studio (fixed full-page background) ----------
+  var canvas = document.getElementById('bg-canvas');
+  if (canvas && typeof THREE !== 'undefined' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try { initStudio(); } catch (e) { /* graceful: static background remains */ }
+  }
+
+  function initStudio() {
+    var isSmall = window.innerWidth < 768;
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !isSmall });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 2));
+
+    // Studio lighting for light-theme 3D depth
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    var dirLight1 = new THREE.DirectionalLight(0x4f46e5, 1.8);
+    dirLight1.position.set(6, 10, 8);
+    scene.add(dirLight1);
+    var dirLight2 = new THREE.DirectionalLight(0x06b6d4, 1.5);
+    dirLight2.position.set(-8, -6, 5);
+    scene.add(dirLight2);
+    var pointLight = new THREE.PointLight(0xec4899, 1.4, 25);
+    pointLight.position.set(0, 3, 6);
+    scene.add(pointLight);
+
+    // Main 3D sculpture: glossy translucent knot + wireframe shell
+    var mainRig = new THREE.Group();
+    scene.add(mainRig);
+    var torusKnot = new THREE.Mesh(
+      new THREE.TorusKnotGeometry(1.35, 0.36, isSmall ? 90 : 140, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x6366f1, roughness: 0.18, metalness: 0.35, transparent: true, opacity: 0.22
+      })
+    );
+    mainRig.add(torusKnot);
+    var geoCage = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2.6, 1),
+      new THREE.MeshBasicMaterial({ color: 0x0891b2, wireframe: true, transparent: true, opacity: 0.22 })
+    );
+    mainRig.add(geoCage);
+
+    // 3 gyroscopic orbit rings
+    var ringMat = new THREE.MeshStandardMaterial({
+      color: 0x4f46e5, roughness: 0.2, metalness: 0.5, transparent: true, opacity: 0.32
+    });
+    var gyro1 = new THREE.Mesh(new THREE.TorusGeometry(3.3, 0.025, 16, 100), ringMat);
+    var gyro2 = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.02, 16, 100), ringMat);
+    var gyro3 = new THREE.Mesh(new THREE.TorusGeometry(4.3, 0.015, 16, 100), ringMat);
+    gyro1.rotation.x = Math.PI / 3;
+    gyro2.rotation.y = Math.PI / 4;
+    gyro3.rotation.z = Math.PI / 6;
+    mainRig.add(gyro1, gyro2, gyro3);
+
+    // Floating 3D satellites
+    var satellites = [];
+    var satGeometries = [
+      new THREE.OctahedronGeometry(0.32, 0),
+      new THREE.BoxGeometry(0.42, 0.42, 0.42),
+      new THREE.IcosahedronGeometry(0.28, 0),
+      new THREE.TorusGeometry(0.26, 0.08, 12, 32)
+    ];
+    var satColors = [0x4f46e5, 0x06b6d4, 0x8b5cf6, 0x3b82f6];
+    var SAT_COUNT = isSmall ? 10 : 18;
+    for (var i = 0; i < SAT_COUNT; i++) {
+      var mesh = new THREE.Mesh(
+        satGeometries[i % satGeometries.length],
+        new THREE.MeshStandardMaterial({
+          color: satColors[i % satColors.length],
+          roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.45
+        })
+      );
+      mesh.position.set(
+        (Math.random() - 0.5) * 18,
+        (Math.random() - 0.5) * 14,
+        (Math.random() - 0.5) * 8 - 2
+      );
+      mesh.userData = {
+        rotSpeedX: (Math.random() - 0.5) * 0.02,
+        rotSpeedY: (Math.random() - 0.5) * 0.02,
+        floatSpeed: 0.8 + Math.random() * 1.5,
+        floatOffset: Math.random() * Math.PI * 2,
+        baseY: mesh.position.y
+      };
+      scene.add(mesh);
+      satellites.push(mesh);
+    }
+
+    function positionMainRig() {
+      if (window.innerWidth > 1024) mainRig.position.set(2.8, 0.3, -1);
+      else mainRig.position.set(0, 0.5, -2.5);
+    }
+    positionMainRig();
+    camera.position.z = 8.5;
+
+    var targetMouseX = 0, targetMouseY = 0, currentScrollY = 0;
+    window.addEventListener('mousemove', function (e) {
+      targetMouseX = (e.clientX / window.innerWidth) - 0.5;
+      targetMouseY = (e.clientY / window.innerHeight) - 0.5;
+    }, { passive: true });
+    window.addEventListener('scroll', function () {
+      currentScrollY = window.scrollY;
+    }, { passive: true });
+    window.addEventListener('resize', function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      positionMainRig();
+    });
+
+    var running = true;
+    document.addEventListener('visibilitychange', function () {
+      running = !document.hidden;
+      if (running) animateScene();
+    });
+
+    var clock = new THREE.Clock();
+    function animateScene() {
+      if (!running) return;
+      requestAnimationFrame(animateScene);
+      var t = clock.getElapsedTime();
+
+      torusKnot.rotation.x = t * 0.35;
+      torusKnot.rotation.y = t * 0.25;
+      geoCage.rotation.y = -t * 0.18;
+      geoCage.rotation.z = t * 0.1;
+      gyro1.rotation.z = t * 0.4;
+      gyro1.rotation.y = Math.sin(t * 0.5) * 0.4;
+      gyro2.rotation.x = -t * 0.32;
+      gyro3.rotation.y = t * 0.28;
+
+      satellites.forEach(function (sat) {
+        sat.rotation.x += sat.userData.rotSpeedX;
+        sat.rotation.y += sat.userData.rotSpeedY;
+        sat.position.y = sat.userData.baseY +
+          Math.sin(t * sat.userData.floatSpeed + sat.userData.floatOffset) * 0.45 +
+          (currentScrollY * 0.002);
+      });
+
+      mainRig.rotation.y += (targetMouseX * 1.3 - mainRig.rotation.y) * 0.06;
+      mainRig.rotation.x += (targetMouseY * 1.3 - mainRig.rotation.x) * 0.06;
+      mainRig.position.y = Math.sin(t * 1.1) * 0.25 - (currentScrollY * 0.0012);
+
+      pointLight.position.x = targetMouseX * 10;
+      pointLight.position.y = -targetMouseY * 10;
+
+      renderer.render(scene, camera);
+    }
+    animateScene();
+  }
+
+  // ---------- Instant Website Checkup (client-side mini audit) ----------
   var maForm = document.getElementById('maForm');
   if (maForm) {
     var maOut = document.getElementById('maResults');
@@ -175,7 +347,7 @@
       maOut.hidden = false;
       maOut.innerHTML = '';
       var p = document.createElement('p');
-      p.className = 'ma-msg' + (text === 'ok' ? '' : '');
+      p.className = 'ma-msg';
       p.textContent = text;
       maOut.appendChild(p);
       maOut.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -220,29 +392,28 @@
         });
     }
 
+    function maEl(tag, cls, text) {
+      var el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
     function renderBlocked(url) {
       maOut.innerHTML = '';
-      var wrap = document.createElement('div');
-      wrap.className = 'ma-panel ma-panel-warn';
-      var t = document.createElement('h3');
-      t.textContent = 'Your site blocked the browser preview — most do.';
-      var d = document.createElement('p');
-      d.textContent = 'Servers often refuse to share their HTML with visitors\' browsers (CORS). No problem: I run the full audit server-side — up to 25 pages crawled, scored on SEO / AEO / GEO, with a plain-language PDF report and top quick wins. It\'s free, no sign-up.';
-      var actions = document.createElement('div');
-      actions.className = 'ma-actions';
-      var a1 = document.createElement('a');
-      a1.className = 'btn btn-primary';
+      var wrap = maEl('div', 'ma-panel ma-panel-warn');
+      wrap.appendChild(maEl('h3', '', 'Your site blocked the browser preview — most do.'));
+      wrap.appendChild(maEl('p', '', 'Servers often refuse to share their HTML with visitors\' browsers (CORS). No problem: I run the full audit server-side — up to 25 pages crawled, scored on SEO / AEO / GEO, with a plain-language PDF report and top quick wins. It\'s free, no sign-up.'));
+      var actions = maEl('div', 'ma-actions');
+      var a1 = maEl('a', 'btn-x px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg', 'Email my URL — get the full report →');
+      a1.style.background = 'linear-gradient(90deg, #4f46e5, #06b6d4)';
       a1.href = 'contact.html';
-      a1.textContent = 'Email my URL — get the full report →';
-      a1.setAttribute('data-url', url.hostname);
-      var a2 = document.createElement('a');
-      a2.className = 'btn btn-ghost';
-      a2.href = 'https://aminashehzadi393.github.io/seo-analyzer/';
-      a2.setAttribute('target', '_blank');
-      a2.setAttribute('rel', 'noopener');
-      a2.textContent = '↗ Try RankCheck instead';
+      var a2 = maEl('a', 'btn-x px-6 py-3 rounded-xl border-2 font-bold text-sm', '↗ Open my 15-point SEO Analyzer');
+      a2.style.borderColor = '#c7d2fe';
+      a2.style.color = '#4f46e5';
+      a2.href = 'analyzer.html?url=' + encodeURIComponent(url.href);
       actions.appendChild(a1); actions.appendChild(a2);
-      wrap.appendChild(t); wrap.appendChild(d); wrap.appendChild(actions);
+      wrap.appendChild(actions);
       maOut.appendChild(wrap);
     }
 
@@ -288,19 +459,18 @@
     }
 
     function grade(score) {
-      if (score >= 90) return ['Excellent', '#34d399'];
-      if (score >= 75) return ['Good', '#00e5ff'];
-      if (score >= 50) return ['Needs Work', '#fbbf24'];
-      return ['Poor', '#f87171'];
+      if (score >= 90) return ['Excellent', '#059669'];
+      if (score >= 75) return ['Good', '#0891b2'];
+      if (score >= 50) return ['Needs Work', '#d97706'];
+      return ['Poor', '#dc2626'];
     }
 
     function renderMa(url, doc) {
       var checks = collectChecks(url, doc);
       var pillar = { seo: 100, aeo: 100, geo: 100 };
-      var severe = { seo: 0, aeo: 0, geo: 0 };
       var failures = [];
       checks.forEach(function (c) {
-        if (!c.ok) { failures.push(c); pillar[c.p] -= c.s * 22; severe[c.p] += c.s; }
+        if (!c.ok) { failures.push(c); pillar[c.p] -= c.s * 22; }
       });
       pillar.seo = Math.max(5, Math.round(pillar.seo));
       pillar.aeo = Math.max(5, Math.round(pillar.aeo));
@@ -310,340 +480,65 @@
       failures.sort(function (a, b) { return b.s - a.s; });
 
       maOut.innerHTML = '';
-      var box = document.createElement('div');
-      box.className = 'ma-panel';
+      var box = maEl('div', 'ma-panel');
 
-      var head = document.createElement('div');
-      head.className = 'ma-head';
-      var ring = document.createElement('div');
-      ring.className = 'ma-ring';
-      ring.style.background = 'conic-gradient(' + g[1] + ' calc(' + overall + '%), rgba(0,229,255,.08) 0)';
-      var ringIn = document.createElement('div');
-      ringIn.className = 'ma-ring-in';
-      var num = document.createElement('b');
-      num.textContent = overall;
-      var cap = document.createElement('small');
-      cap.textContent = '/100 · ' + g[0].toUpperCase();
+      var head = maEl('div', 'ma-head');
+      var ring = maEl('div', 'ma-ring');
+      ring.style.background = 'conic-gradient(' + g[1] + ' calc(' + overall + '%), #e2e8f0 0)';
+      var ringIn = maEl('div', 'ma-ring-in');
+      ringIn.appendChild(maEl('b', '', String(overall)));
+      var cap = maEl('small', '', '/100 · ' + g[0].toUpperCase());
       cap.style.color = g[1];
-      ringIn.appendChild(num); ringIn.appendChild(cap);
+      ringIn.appendChild(cap);
       ring.appendChild(ringIn);
       head.appendChild(ring);
 
-      var headRight = document.createElement('div');
-      headRight.className = 'ma-head-right';
-      var hTitle = document.createElement('h3');
-      hTitle.textContent = 'Readiness of ' + url.hostname;
-      headRight.appendChild(hTitle);
+      var headRight = maEl('div', 'ma-head-right');
+      headRight.appendChild(maEl('h3', '', 'Readiness of ' + url.hostname));
       [['SEO', pillar.seo, 'Google findability'], ['AEO', pillar.aeo, 'Answers your visitors\' questions'], ['GEO', pillar.geo, 'AI assistants can cite you']].forEach(function (row) {
-        var br = document.createElement('div');
-        br.className = 'ma-bar-row';
-        var lbl = document.createElement('span');
-        lbl.className = 'ma-blbl';
-        lbl.textContent = row[0] + ' — ' + row[2];
-        var bar = document.createElement('span');
-        bar.className = 'ma-bar';
-        var fill = document.createElement('span');
-        fill.className = 'ma-fill';
+        var br = maEl('div', 'ma-bar-row');
+        br.appendChild(maEl('span', 'ma-blbl', row[0] + ' — ' + row[2]));
+        var bar = maEl('span', 'ma-bar');
+        var fill = maEl('span', 'ma-fill');
         fill.style.width = row[1] + '%';
-        fill.style.background = row[1] >= 80 ? 'linear-gradient(90deg,#00e5ff,#34d399)' : row[1] >= 50 ? 'linear-gradient(90deg,#fbbf24,#00e5ff)' : 'linear-gradient(90deg,#f87171,#fbbf24)';
-        var val = document.createElement('span');
-        val.className = 'ma-bval';
-        val.textContent = row[1] + '%';
+        fill.style.background = row[1] >= 80 ? 'linear-gradient(90deg,#059669,#0891b2)' : row[1] >= 50 ? 'linear-gradient(90deg,#d97706,#0891b2)' : 'linear-gradient(90deg,#dc2626,#d97706)';
         bar.appendChild(fill);
-        br.appendChild(lbl); br.appendChild(bar); br.appendChild(val);
+        br.appendChild(bar);
+        br.appendChild(maEl('span', 'ma-bval', row[1] + '%'));
         headRight.appendChild(br);
       });
       head.appendChild(headRight);
       box.appendChild(head);
 
       if (failures.length) {
-        var issuesTitle = document.createElement('div');
-        issuesTitle.className = 'ma-sub';
-        issuesTitle.textContent = 'Issues found (' + failures.length + ') — sorted by severity';
-        box.appendChild(issuesTitle);
+        box.appendChild(maEl('div', 'ma-sub', 'Issues found (' + failures.length + ') — sorted by severity'));
         failures.forEach(function (f) {
-          var it = document.createElement('div');
-          it.className = 'ma-issue';
-          var dot = document.createElement('span');
-          dot.className = 'sev-dot ' + (f.s >= 3 ? 'crit' : f.s === 2 ? 'warn' : 'info');
-          var body = document.createElement('div');
-          var b1 = document.createElement('strong');
-          b1.textContent = f.label;
-          var b2 = document.createElement('small');
-          b2.textContent = f.fix;
-          body.appendChild(b1); body.appendChild(b2);
-          it.appendChild(dot); it.appendChild(body);
+          var it = maEl('div', 'ma-issue');
+          it.appendChild(maEl('span', 'sev-dot ' + (f.s >= 3 ? 'crit' : f.s === 2 ? 'warn' : 'info')));
+          var body = maEl('div', '');
+          body.appendChild(maEl('strong', '', f.label));
+          body.appendChild(maEl('small', '', f.fix));
+          it.appendChild(body);
           box.appendChild(it);
         });
       } else {
-        var allGood = document.createElement('div');
-        allGood.className = 'ma-sub ok';
-        allGood.textContent = '✔ All 13 checks passed — your basics are solid.';
-        box.appendChild(allGood);
+        box.appendChild(maEl('div', 'ma-sub ok', '✔ All 13 checks passed — your basics are solid.'));
       }
 
-      var actions = document.createElement('div');
-      actions.className = 'ma-actions';
-      var a1 = document.createElement('a');
-      a1.className = 'btn btn-primary';
+      var actions = maEl('div', 'ma-actions');
+      var a1 = maEl('a', 'btn-x px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg', 'Unlock my FULL audit — up to 25 pages + PDF (free) →');
+      a1.style.background = 'linear-gradient(90deg, #4f46e5, #06b6d4)';
       a1.href = 'contact.html';
-      a1.textContent = 'Unlock my FULL audit — up to 25 pages + PDF (free) →';
-      var a2 = document.createElement('a');
-      a2.className = 'btn btn-ghost';
-      a2.href = 'https://aminashehzadi393.github.io/seo-analyzer/';
-      a2.setAttribute('target', '_blank');
-      a2.setAttribute('rel', 'noopener');
-      a2.textContent = '↗ More checks with RankCheck';
+      var a2 = maEl('a', 'btn-x px-6 py-3 rounded-xl border-2 font-bold text-sm', '↗ Open my 15-point SEO Analyzer');
+      a2.style.borderColor = '#c7d2fe';
+      a2.style.color = '#4f46e5';
+      a2.href = 'analyzer.html?url=' + encodeURIComponent(url.href);
       actions.appendChild(a1); actions.appendChild(a2);
       box.appendChild(actions);
 
-      var fine = document.createElement('small');
-      fine.className = 'ma-fineprint';
-      fine.textContent = 'Preview based on best-practice rules run locally in your browser. Not a Google score. Amina also co-built a full crawl engine (SEO_skp): FastAPI · React · explainable scoring.';
-      box.appendChild(fine);
+      box.appendChild(maEl('small', 'ma-fineprint', 'Preview based on best-practice rules run locally in your browser. Not a Google score. Amina also co-built a full crawl engine (SEO_skp): FastAPI · React · explainable scoring.'));
       maOut.appendChild(box);
       maOut.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  }
-
-  // 3D Tabs — clicking (or auto-cycle) swaps card panels with a 3D flip
-  var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab3d'));
-  var tabPanes = Array.prototype.slice.call(document.querySelectorAll('.tabpane'));
-  if (tabBtns.length && tabPanes.length) {
-    var current = 0;
-    var paused = false;
-    var stage = document.querySelector('.tabstage');
-    function setTab(idx, user) {
-      current = (idx + tabBtns.length) % tabBtns.length;
-      tabBtns.forEach(function (b, i) {
-        b.classList.toggle('active', i === current);
-        b.setAttribute('aria-selected', i === current ? 'true' : 'false');
-      });
-      tabPanes.forEach(function (p, i) {
-        p.classList.toggle('active', i === current);
-      });
-      if (user) paused = true;
-    }
-    tabBtns.forEach(function (b, i) {
-      b.addEventListener('click', function () { setTab(i, true); });
-    });
-    if (stage) {
-      stage.addEventListener('mouseenter', function () { paused = true; });
-      stage.addEventListener('mouseleave', function () { paused = false; });
-    }
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setInterval(function () {
-        if (!paused && !document.hidden) setTab(current + 1, false);
-      }, 6000);
-    }
-  }
-
-  // Multi-depth 3D matrix cards
-  if (window.matchMedia('(pointer: fine)').matches) {
-    var fine = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!fine) {
-      document.querySelectorAll('.matrix-card').forEach(function (card) {
-        card.addEventListener('mousemove', function (e) {
-          var r = card.getBoundingClientRect();
-          var px = (e.clientX - r.left) / r.width;
-          var py = (e.clientY - r.top) / r.height;
-          var x = (px - 0.5), y = (py - 0.5);
-          card.style.transform =
-            'perspective(900px) rotateX(' + (-y * 9) + 'deg) rotateY(' + (x * 11) + 'deg)';
-          card.style.setProperty('--mx', (px * 100) + '%');
-          card.style.setProperty('--my', (py * 100) + '%');
-        });
-        card.addEventListener('mouseleave', function () { card.style.transform = ''; });
-      });
-    }
-  }
-
-  // Scroll progress bar
-  var bar = document.getElementById('scrollProgress');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'scrollProgress';
-    document.body.appendChild(bar);
-  }
-  window.addEventListener('scroll', function () {
-    var h = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
-  }, { passive: true });
-
-  // Three.js hero: floating 3D SEO icons + ambient starfield (home page only)
-  var canvas = document.getElementById('hero-canvas');
-  if (canvas && typeof THREE !== 'undefined' &&
-      !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    try { initHero(canvas); } catch (e) { /* graceful: static hero remains */ }
-  }
-
-  function initHero(canvas) {
-    var hero = canvas.closest('.hero');
-    var isMobile = window.matchMedia('(max-width: 768px)').matches;
-    var renderer = new THREE.WebGLRenderer({
-      canvas: canvas, alpha: true, antialias: !isMobile, powerPreference: 'high-performance'
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 140);
-    camera.position.z = 30;
-
-    // Studio lighting — the metal picks up moving highlights from these
-    scene.add(new THREE.AmbientLight(0x1b2b4a, 1.1));
-    var keyLight = new THREE.PointLight(0x00e5ff, 2.6, 90);
-    scene.add(keyLight);
-    var rimLight = new THREE.PointLight(0x8b5cf6, 2.2, 90);
-    rimLight.position.set(-18, -10, 14);
-    scene.add(rimLight);
-
-    // Sculpture rig — parked to the right on desktop so text stays readable
-    var rig = new THREE.Group();
-    var rigBaseY = isMobile ? -4 : 0;
-    rig.position.set(isMobile ? 0 : 7.5, rigBaseY, 0);
-    if (isMobile) rig.scale.setScalar(0.8);
-    scene.add(rig);
-
-    function neon(color, opacity) {
-      return new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity });
-    }
-
-    // SEO concept: "Rank Ascent" — five steps climbing to position #1
-    var barHeights = [1.1, 1.8, 2.6, 3.5, 4.6];
-    for (var s = 0; s < barHeights.length; s++) {
-      var topSpot = s === barHeights.length - 1;
-      var bm = new THREE.Mesh(
-        new THREE.BoxGeometry(0.95, barHeights[s], 0.95),
-        new THREE.MeshStandardMaterial({
-          color: topSpot ? 0x0e5f8a : 0x14395c,
-          metalness: 0.55,
-          roughness: 0.35,
-          emissive: topSpot ? 0x0891b2 : 0x000000,
-          emissiveIntensity: topSpot ? 0.45 : 0
-        })
-      );
-      bm.position.set(-2.4 + s * 1.2, barHeights[s] / 2, 0);
-      rig.add(bm);
-    }
-    // Glowing marker floating over the #1 spot (a site claiming page one)
-    var marker = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 18), neon(0x00e5ff, 0.95));
-    marker.position.set(2.4, 5.6, 0.4);
-    rig.add(marker);
-    // Halo ring around the marker
-    var halo = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.05, 8, 40), neon(0xfbbf24, 0.8));
-    halo.position.copy(marker.position);
-    rig.add(halo);
-    // Thin magnifier ring arcing over the whole ranking — the SEO signature
-    var mag = new THREE.Mesh(new THREE.TorusGeometry(5.4, 0.09, 10, 120), neon(0x00e5ff, 0.55));
-    mag.rotation.set(Math.PI / 2.4, 0.35, 0);
-    rig.add(mag);
-    var magHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.6, 10), neon(0x00e5ff, 0.75));
-    magHandle.position.set(5.1, -4.4, -0.6);
-    magHandle.rotation.z = -Math.PI / 4 - Math.PI / 2.4;
-    rig.add(magHandle);
-
-    // Thin glowing orbit rings
-    function orbit(radius, tiltX, tiltY, color, opacity) {
-      var r = new THREE.Mesh(
-        new THREE.TorusGeometry(radius, 0.07, 8, 140),
-        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity })
-      );
-      r.rotation.set(tiltX, tiltY, 0);
-      rig.add(r);
-      return r;
-    }
-    var ring1 = orbit(10.5, Math.PI / 2.5, 0.3, 0x00e5ff, 0.5);
-    var ring2 = orbit(13.5, Math.PI / 1.9, -0.5, 0x8b5cf6, 0.35);
-
-    // Distant starfield — round points only, very dim
-    var N = isMobile ? 28 : 70;
-    var positions = new Float32Array(N * 3);
-    var velocities = [];
-    for (var i = 0; i < N; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 70;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 34;
-      positions[i * 3 + 2] = -6 - Math.random() * 22;
-      velocities.push({
-        x: (Math.random() - 0.5) * 0.01,
-        y: (Math.random() - 0.5) * 0.01,
-        z: 0
-      });
-    }
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    var stars = new THREE.Points(geo, new THREE.PointsMaterial({
-      color: 0x7fdcff, size: 0.18, transparent: true, opacity: 0.35,
-      sizeAttenuation: true, depthWrite: false
-    }));
-    scene.add(stars);
-
-    var mouseX = 0, mouseY = 0;
-    window.addEventListener('mousemove', function (e) {
-      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-    }, { passive: true });
-
-    if (isMobile) {
-      setInterval(function () {
-        mouseX = Math.sin(Date.now() / 4000) * 0.5;
-        mouseY = Math.cos(Date.now() / 5000) * 0.4;
-      }, 4000);
-    }
-
-    function resize() {
-      var w = hero.clientWidth, h = hero.clientHeight;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    var running = true;
-    document.addEventListener('visibilitychange', function () {
-      running = !document.hidden;
-      if (running) animate();
-    });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        var vis = entries[0].isIntersecting;
-        if (vis && !running) { running = true; animate(); }
-        else if (!vis) { running = false; }
-      }).observe(hero);
-    }
-
-    var clock0 = performance.now();
-    function animate() {
-      if (!running) return;
-      requestAnimationFrame(animate);
-      var t = (performance.now() - clock0) * 0.001;
-
-      // gentle sway only — keeps the ranking sculpture readable, never spinny
-      rig.rotation.y = Math.sin(t * 0.22) * 0.22;
-      marker.position.y = 5.6 + Math.sin(t * 1.3) * 0.35;
-      halo.position.y = marker.position.y;
-      halo.rotation.z = t * 0.6;
-      mag.rotation.z = Math.sin(t * 0.18) * 0.08;
-      ring1.rotation.z = Math.sin(t * 0.3) * 0.15;
-      ring2.rotation.z = -Math.sin(t * 0.26) * 0.12;
-      rig.position.y = rigBaseY + Math.sin(t * 0.55) * 0.4;
-
-      // sweeping key light: highlights glide across the metal
-      keyLight.position.set(Math.cos(t * 0.4) * 22, 12, Math.sin(t * 0.4) * 16 + 6);
-
-      var p = geo.attributes.position.array;
-      for (var i = 0; i < N; i++) {
-        p[i * 3] += velocities[i].x;
-        p[i * 3 + 1] += velocities[i].y;
-        if (p[i * 3] > 35 || p[i * 3] < -35) velocities[i].x *= -1;
-        if (p[i * 3 + 1] > 17 || p[i * 3 + 1] < -17) velocities[i].y *= -1;
-      }
-      geo.attributes.position.needsUpdate = true;
-
-      camera.position.x += (mouseX * (isMobile ? 0.8 : 2.2) - camera.position.x) * 0.04;
-      camera.position.y += (-mouseY * (isMobile ? 0.6 : 1.3) - camera.position.y) * 0.04;
-      camera.lookAt(rig.position.x * 0.6, 0, 0);
-      renderer.render(scene, camera);
-    }
-    animate();
   }
 })();

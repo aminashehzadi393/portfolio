@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free SEO Analyzer — Amina Shehzadi</title>
+    <meta name="description" content="Paste any page's HTML and get an instant 15-point SEO score — titles, meta, headings, images, schema, AI-readiness. Free, runs in your browser.">
+    <link rel="canonical" href="https://aminashehzadi393.github.io/portfolio/analyzer.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Free SEO Analyzer — Amina Shehzadi">
+    <meta property="og:description" content="Instant 15-point SEO score for any page — free, no signup.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] } } } };
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="antialiased selection:bg-indigo-600 selection:text-white" style="background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F0FDFA 100%); color: #0F172A;">
+
+    <div class="perspective-grid"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="relative z-10">
+
+        <header class="fixed w-full top-0 z-50 glass-nav-light">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <a href="index.html" class="font-display text-2xl font-bold tracking-tight flex items-center select-none group">
+                    <span class="logo-mark">A</span>
+                    <span class="text-slate-900">Am</span><!--
+                    --><span class="i-stem-wrapper text-slate-900">
+                        <span class="i-dot-3d"></span>
+                        <span class="i-dot-shadow"></span>
+                        <span>&#305;</span>
+                    </span><!--
+                    --><span class="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">na</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-7 text-sm font-semibold text-slate-600">
+                    <a href="index.html" class="hover:text-indigo-600 transition">Home</a>
+                    <a href="analyzer.html" class="text-indigo-600">Analyzer</a>
+                    <a href="projects.html" class="hover:text-indigo-600 transition">Projects</a>
+                    <a href="about.html" class="hover:text-indigo-600 transition">About</a>
+                    <a href="contact.html" class="hover:text-indigo-600 transition">Contact</a>
+                </nav>
+                <div class="hidden md:flex items-center">
+                    <a href="contact.html" class="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-indigo-600 text-white font-semibold text-sm shadow-xl shadow-indigo-500/20 transition duration-300 transform hover:-translate-y-0.5">
+                        Start a Project <i class="fa-solid fa-arrow-right ml-1.5 text-xs"></i>
+                    </a>
+                </div>
+                <button id="burger" class="md:hidden text-slate-800 text-2xl" aria-label="Menu">&#9776;</button>
+            </div>
+            <div id="navLinks" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-6 py-5 space-y-3 text-sm font-semibold text-slate-700">
+                <a href="index.html" class="block py-1.5 hover:text-indigo-600">Home</a>
+                <a href="projects.html" class="block py-1.5 hover:text-indigo-600">Projects</a>
+                <a href="contact.html" class="block text-center py-3 rounded-xl bg-indigo-600 text-white font-bold">Start a Project</a>
+            </div>
+        </header>
+
+        <main class="pt-36 pb-24">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-12 reveal">
+                    <span class="px-3.5 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase tracking-widest">Free SEO Tool · <span class="text-emerald-600">●</span> Always On</span>
+                    <h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 mt-4">Best-in-Page <span class="gradient-text-vivid">SEO Analyzer</span></h1>
+                    <p class="text-slate-600 text-sm sm:text-base mt-3">Enter any page URL and get an instant <strong>15-point score</strong> — titles, meta, headings, images, links, schema and AI-readiness. I fetch and parse it live in your browser.</p>
+                </div>
+
+                <div class="scene-3d-wrap">
+                    <div class="card-3d-light rounded-3xl p-8 md:p-10 reveal">
+                        <form id="urlForm" novalidate>
+                            <label for="urlInput" class="block text-xs font-mono font-bold uppercase text-indigo-600 mb-3">Any page URL — I do the rest</label>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input id="urlInput" inputmode="url" placeholder="https://yourbusiness.com/any-page" autocomplete="off" class="flex-1 min-w-0 px-4 py-4 rounded-xl bg-white border-2 border-slate-200 text-slate-900 text-sm focus:border-indigo-600 focus:outline-none shadow-sm">
+                                <button id="analyzeBtn" class="btn-x px-7 py-4 rounded-xl text-white font-bold text-sm whitespace-nowrap shrink-0" style="background: linear-gradient(90deg, #4f46e5, #06b6d4);">Analyze Page <i class="fa-solid fa-bolt ml-1"></i></button>
+                            </div>
+                        </form>
+                        <p class="text-xs text-slate-500 mt-3"><i class="fa-solid fa-shield-halved mr-1 text-indigo-600"></i>Nothing is stored — parsing and scoring run live in your browser. Some sites block browser previews; I tell you instantly and it becomes a free full-audit case.</p>
+
+                        <div id="output" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-16 reveal">
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-slate-900">Scored low? The fixes are the job.</h2>
+                    <p class="text-slate-600 text-sm mt-3 mb-6">I implement these fixes for real businesses — on-page rewrites, speed work and AI-readiness.</p>
+                    <a href="contact.html" class="inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold shadow-xl shadow-indigo-500/30 transition transform hover:-translate-y-1">Get My Fixes — Free Audit <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="border-t border-slate-200/80 py-10 bg-white/60 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <a href="index.html" class="font-display text-xl font-bold tracking-tight flex items-center">
+                    <span class="logo-mark" style="width:2rem;height:2rem;">A</span>
+                    <span class="text-slate-900">Am</span><!--
+                    --><span class="i-stem-wrapper text-slate-900">
+                        <span class="i-dot-3d"></span>
+                        <span class="i-dot-shadow"></span>
+                        <span>&#305;</span>
+                    </span><!--
+                    --><span class="text-indigo-600">na</span>
+                </a>
+                <div class="text-xs font-medium text-slate-500">&copy; <span id="year">2026</span> Amina Shehzadi — SEO Expert</div>
+                <div class="text-xs font-medium text-slate-500 flex gap-4">
+                    <a href="https://www.linkedin.com/in/amina-shehzadi-seo-digital-marketing-webdevelopment/" class="hover:text-indigo-600" target="_blank" rel="noopener">LinkedIn</a>
+                    <a href="https://github.com/aminashehzadi393" class="hover:text-indigo-600" target="_blank" rel="noopener">GitHub</a>
+                    <a href="mailto:aminashehzadi393@gmail.com" class="hover:text-indigo-600">Email</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <button id="toTop" aria-label="Back to top">&uarr;</button>
+    <script src="app.js"></script>
+    <script src="ai-chat.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        var form = document.getElementById('urlForm');
+        var btn = document.getElementById('analyzeBtn');
+        var input = document.getElementById('urlInput');
+        var out = document.getElementById('output');
+
+        var yr = document.getElementById('year');
+        if (yr) yr.textContent = new Date().getFullYear();
+
+        function el(tag, cls, html) {
+            var e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (html !== undefined) e.innerHTML = html;
+            return e;
+        }
+
+        function busyMsg(urlObj) {
+            out.innerHTML = '';
+            var p = el('p', 'ma-msg');
+            p.appendChild(Object.assign(document.createElement('span'), { className: 'live-pulse' }));
+            var t = document.createElement('span');
+            t.textContent = ' Fetching and analyzing ' + urlObj.hostname + ' — running 15 checks live…';
+            p.appendChild(t);
+            out.appendChild(p);
+            out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function fetchWithTimeout(url, ms) {
+            var ac = ('AbortController' in window) ? new AbortController() : null;
+            var timer = setTimeout(function () { if (ac) ac.abort(); }, ms);
+            return fetch(url, { redirect: 'follow', signal: ac ? ac.signal : undefined }).then(function (r) {
+                clearTimeout(timer);
+                if (!r.ok) throw new Error('http ' + r.status);
+                return r.text();
+            }).catch(function (e) {
+                clearTimeout(timer);
+                throw e;
+            });
+        }
+
+        // Full-HTML chain: direct fetch first (works on CORS-friendly sites),
+        // then public relays. Any win returns the page's raw HTML.
+        function fetchHtml(url) {
+            var attempts = [
+                url,
+                'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+                'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)
+            ];
+            var i = 0;
+            function tryNext() {
+                if (i >= attempts.length) throw new Error('blocked');
+                var attempt = attempts[i];
+                return fetchWithTimeout(attempt, 9000).then(function (html) {
+                    if (!html || html.length < 40) throw new Error('empty');
+                    return html;
+                }).catch(function () {
+                    i++;
+                    return tryNext();
+                });
+            }
+            return tryNext();
+        }
+
+        // Microlink: free keyless service that fetches any page server-side
+        // and returns its real published metadata (title, description, lang…).
+        function fetchMetadata(url) {
+            return fetchWithTimeout('https://api.microlink.io/?url=' + encodeURIComponent(url), 15000)
+                .then(function (txt) {
+                    var j = JSON.parse(txt);
+                    if (!j || j.status !== 'success' || !j.data) throw new Error('no data');
+                    return j.data;
+                });
+        }
+
+        // ---- 15-point rule engine ----
+        function runChecks(doc) {
+            var title = (doc.title || '').replace(/\s+/g, ' ').trim();
+            var m = function (sel) { var e = doc.querySelector(sel); return e ? (e.getAttribute('content') || '') : ''; };
+            var desc = m('meta[name="description" i], meta[name="DESCRIPTION"]');
+            var robots = (m('meta[name="robots" i]') || '').toLowerCase();
+            var h1s = doc.querySelectorAll('h1');
+            var imgs = doc.querySelectorAll('img');
+            var noAlt = 0;
+            for (var im = 0; im < imgs.length; im++) { if (!imgs[im].getAttribute('alt')) noAlt++; }
+            var links = doc.querySelectorAll('a[href]').length;
+            var words = (doc.body ? doc.body.textContent : '').trim().split(/\s+/).filter(Boolean).length;
+            var og = m('meta[property="og:title" i]') && m('meta[property="og:description" i]');
+            var tw = m('meta[name="twitter:card" i]');
+            var files = [];
+            function chk(cat, w, ok, label, fix) {
+                if (!ok) files.push({ cat: cat, w: w, label: label, fix: fix });
+            }
+
+            chk('meta', 2, !!title, '<title> tag exists', 'Add a <title> — it is the single most important on-page tag.');
+            chk('meta', 2, !!title && title.length >= 10 && title.length <= 70, title ? 'Title length ' + title.length + ' chars (ideal 10–70)' : 'Title tag empty', 'Rewrite the title to 10–70 characters, keyword first.');
+            chk('meta', 2, !!desc && desc.length >= 50 && desc.length <= 160, desc ? 'Meta description ' + desc.length + ' chars (ideal 50–160)' : 'Meta description missing', 'Write a compelling 50–160 char meta description with your keyword.');
+            chk('meta', 2, !!doc.querySelector('link[rel="canonical" i]'), 'Canonical URL set', 'Add link rel="canonical" to prevent duplicate-content issues.');
+            chk('meta', 2, !!doc.querySelector('meta[name="viewport" i]'), 'Mobile viewport configured', 'Add the responsive viewport meta tag.');
+            chk('meta', 1, !!doc.documentElement.getAttribute('lang'), 'Language declared (lang attribute)', 'Add lang="en" (or your language) on the html tag.');
+            chk('meta', 2, robots.indexOf('noindex') === -1, 'Page is indexable (no noindex)', 'Remove the noindex robots meta tag — Google is being told to ignore this page.');
+            chk('meta', 1, !!doc.querySelector('link[rel*="icon" i]'), 'Favicon defined', 'Add a favicon link tag.');
+
+            chk('content', 2, h1s.length === 1, h1s.length === 1 ? 'Exactly one H1' : h1s.length === 0 ? 'No H1 heading found' : h1s.length + ' H1 headings (want exactly 1)', 'Use exactly one descriptive H1 per page.');
+            var subN = doc.querySelectorAll('h2, h3').length;
+            chk('content', 1, subN >= 2, subN + ' H2/H3 subheadings structure the page', 'Break sections into H2/H3 subheadings.');
+            chk('content', 2, words >= 250, words + ' words of body text (need 250+)', 'Publish at least 250 words that answer customer questions.');
+            chk('content', 2, imgs.length === 0 || noAlt === 0, noAlt ? noAlt + ' image(s) missing ALT text' : 'All ' + imgs.length + ' images have ALT text', 'Describe every image in its alt attribute (also helps image search).');
+            chk('content', 1, links >= 5, links + ' links on page (want 5+)', 'Add helpful internal + external links — crawlers follow them.');
+
+            chk('social', 1, !!og, 'Open Graph preview tags present', 'Add og:title + og:description for rich link previews and AI context.');
+            chk('social', 1, !!tw, 'Twitter card configured', 'Add meta name="twitter:card".');
+            chk('social', 2, doc.querySelectorAll('script[type="application/ld+json"]').length > 0, 'Schema.org structured data (JSON-LD) present', 'Add JSON-LD schema so Google and AI assistants understand your business.');
+
+            return files;
+        }
+
+        function grade(score) {
+            if (score >= 90) return ['EXCELLENT', '#059669'];
+            if (score >= 75) return ['GOOD', '#0891b2'];
+            if (score >= 50) return ['NEEDS WORK', '#d97706'];
+            return ['POOR', '#dc2626'];
+        }
+
+        function blockedPanel(url) {
+            out.innerHTML = '';
+            var wrap = el('div', 'ma-panel ma-panel-warn');
+            wrap.appendChild(el('h3', '', 'This site blocked the browser preview — most do.'));
+            wrap.appendChild(el('p', '', 'Servers can refuse to share their HTML with visitors\' browsers (CORS). No problem: I run the full audit server-side — up to 25 pages crawled, scored on SEO / AEO / GEO, with a plain-language PDF report and top quick wins. Free, no sign-up. Send the URL below.'));
+            var actions = el('div', 'ma-actions');
+            var a1 = el('a', 'btn-x px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg', 'Email this URL — get the full report →');
+            a1.style.background = 'linear-gradient(90deg, #4f46e5, #06b6d4)';
+            a1.href = 'contact.html';
+            actions.appendChild(a1);
+            wrap.appendChild(actions);
+            out.appendChild(wrap);
+            out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderMetaResult(urlObj, data) {
+            out.innerHTML = '';
+            var panel = el('div', 'ma-panel');
+
+            panel.appendChild(el('div', 'ma-sub ok', '&#9432; PARTIAL SCAN — this site blocks HTML reads in the browser, so rules below run on the metadata it publishes (fetched server-side). For the full 25-page crawl + PDF, claim the free audit.'));
+
+            // Meta-signal checks from real, server-fetched data
+            var okHttps = urlObj.protocol === 'https:';
+            var title = (data.title || '').trim();
+            var desc = (data.description || '').trim();
+            var imgUrl = data.image || data.logo;
+            var checks = [
+                { w: 2, ok: okHttps, label: 'HTTPS secure connection', fix: 'Move the site to HTTPS (SSL certificate).' },
+                { w: 2, ok: !!title, label: 'Page title exists', fix: 'Add a <title> tag.' },
+                { w: 2, ok: !!title && title.length >= 10 && title.length <= 70, label: title ? 'Title length ' + title.length + ' chars (ideal 10–70)' : 'Title missing', fix: 'Make the title 10–70 characters, keyword first.' },
+                { w: 2, ok: !!desc, label: 'Meta description exists', fix: 'Add a meta description.' },
+                { w: 2, ok: !!desc && desc.length >= 50 && desc.length <= 160, label: desc ? 'Description length ' + desc.length + ' chars (ideal 50–160)' : 'Description missing', fix: 'Write a 50–160 char description with your keyword.' },
+                { w: 1, ok: !!data.lang, label: data.lang ? 'Language declared (' + data.lang + ')' : 'Language not declared', fix: 'Set the lang attribute on html.' },
+                { w: 1, ok: !!imgUrl, label: imgUrl ? 'Social preview image configured' : 'No social preview image (og:image)', fix: 'Add og:image so link shares look professional.' }
+            ];
+            var totalW = 0, lostW = 0;
+            checks.forEach(function (c) { totalW += c.w; if (!c.ok) lostW += c.w; });
+            var overall = Math.max(5, Math.round(100 * (1 - lostW / totalW)));
+            var g = overall >= 90 ? ['EXCELLENT', '#059669'] : overall >= 75 ? ['GOOD', '#0891b2'] : overall >= 50 ? ['NEEDS WORK', '#d97706'] : ['POOR', '#dc2626'];
+            var metaScore = Math.max(5, Math.round(100 * (1 - lostW / 11)));
+            var socScore = imgUrl ? 100 : 20;
+
+            var head = el('div', 'ma-head');
+            var ring = el('div', 'ma-ring');
+            ring.style.background = 'conic-gradient(' + g[1] + ' calc(' + overall + '%), #e2e8f0 0)';
+            var ringIn = el('div', 'ma-ring-in');
+            ringIn.appendChild(el('b', '', String(overall)));
+            var cap = el('small', '', '/100 · ' + g[0]);
+            cap.style.color = g[1];
+            ringIn.appendChild(cap);
+            ring.appendChild(ringIn);
+            head.appendChild(ring);
+
+            var right = el('div', 'ma-head-right');
+            right.appendChild(el('h3', '', 'Metadata score of ' + urlObj.hostname));
+            [['Core Meta Tags', metaScore], ['Social Preview', socScore], ['Content &amp; AI Depth', null]].forEach(function (row) {
+                var br = el('div', 'ma-bar-row');
+                br.appendChild(el('span', 'ma-blbl', row[0]));
+                var bar = el('span', 'ma-bar');
+                var fill = el('span', 'ma-fill');
+                if (row[1] === null) {
+                    fill.style.width = '100%';
+                    fill.style.background = '#e2e8f0';
+                } else {
+                    fill.style.width = row[1] + '%';
+                    fill.style.background = row[1] >= 80 ? 'linear-gradient(90deg,#059669,#0891b2)' : row[1] >= 50 ? 'linear-gradient(90deg,#d97706,#0891b2)' : 'linear-gradient(90deg,#dc2626,#d97706)';
+                }
+                bar.appendChild(fill);
+                br.appendChild(bar);
+                br.appendChild(el('span', 'ma-bval', row[1] === null ? '&lt;full scan&gt;' : row[1] + '%'));
+                right.appendChild(br);
+            });
+            head.appendChild(right);
+            panel.appendChild(head);
+
+            var fails = checks.filter(function (c) { return !c.ok; });
+            if (fails.length) {
+                panel.appendChild(el('div', 'ma-sub', 'Metadata issues found (' + fails.length + ')'));
+                fails.forEach(function (f) {
+                    var it = el('div', 'ma-issue');
+                    it.appendChild(el('span', 'sev-dot ' + (f.w === 2 ? 'crit' : 'info')));
+                    var body = el('div', '');
+                    body.appendChild(el('strong', '', f.label));
+                    body.appendChild(el('small', '', 'Fix: ' + f.fix));
+                    it.appendChild(body);
+                    panel.appendChild(it);
+                });
+            } else {
+                panel.appendChild(el('div', 'ma-sub ok', '&#10004; All metadata signals passed.'));
+            }
+            panel.appendChild(el('small', 'ma-fineprint', 'Content depth, headings, images, links and schema checks need the full HTML read — claim the free server-side audit below for the complete 25-page report.'));
+
+            var actions = el('div', 'ma-actions');
+            var a1 = el('a', 'btn-x px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg', 'Claim my free full audit (25 pages + PDF) →');
+            a1.style.background = 'linear-gradient(90deg, #4f46e5, #06b6d4)';
+            a1.href = 'contact.html';
+            actions.appendChild(a1);
+            panel.appendChild(actions);
+
+            out.appendChild(panel);
+            out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function renderResult(urlObj, doc, partial) {
+            var files = runChecks(doc);
+
+            var cat = { meta: 100, content: 100, social: 100 };
+            files.forEach(function (f) { cat[f.cat] -= f.w === 2 ? 11 : 5; });
+            cat.meta = Math.max(5, Math.round(cat.meta));
+            cat.content = Math.max(5, Math.round(cat.content));
+            cat.social = Math.max(5, Math.round(cat.social));
+            var overall = Math.round(0.35 * cat.meta + 0.4 * cat.content + 0.25 * cat.social);
+            var g = grade(overall);
+            files.sort(function (a, b) { return b.w - a.w; });
+
+            out.innerHTML = '';
+            var panel = el('div', 'ma-panel');
+            var head = el('div', 'ma-head');
+
+            var ring = el('div', 'ma-ring');
+            ring.style.background = 'conic-gradient(' + g[1] + ' calc(' + overall + '%), #e2e8f0 0)';
+            var ringIn = el('div', 'ma-ring-in');
+            ringIn.appendChild(el('b', '', String(overall)));
+            var cap = el('small', '', '/100 · ' + g[0]);
+            cap.style.color = g[1];
+            ringIn.appendChild(cap);
+            ring.appendChild(ringIn);
+            head.appendChild(ring);
+
+            var right = el('div', 'ma-head-right');
+            right.appendChild(el('h3', '', 'SEO score of ' + urlObj.hostname));
+            [['Core Meta Tags', cat.meta], ['Content &amp; Structure', cat.content], ['Social &amp; AI Signals', cat.social]].forEach(function (row) {
+                var br = el('div', 'ma-bar-row');
+                br.appendChild(el('span', 'ma-blbl', row[0]));
+                var bar = el('span', 'ma-bar');
+                var fill = el('span', 'ma-fill');
+                fill.style.width = row[1] + '%';
+                fill.style.background = row[1] >= 80 ? 'linear-gradient(90deg,#059669,#0891b2)' : row[1] >= 50 ? 'linear-gradient(90deg,#d97706,#0891b2)' : 'linear-gradient(90deg,#dc2626,#d97706)';
+                bar.appendChild(fill);
+                br.appendChild(bar);
+                br.appendChild(el('span', 'ma-bval', row[1] + '%'));
+                right.appendChild(br);
+            });
+            head.appendChild(right);
+            panel.appendChild(head);
+
+            if (files.length) {
+                panel.appendChild(el('div', 'ma-sub', 'Issues found (' + files.length + ') — sorted by priority'));
+                files.forEach(function (f) {
+                    var it = el('div', 'ma-issue');
+                    it.appendChild(el('span', 'sev-dot ' + (f.w === 2 ? 'crit' : 'info')));
+                    var body = el('div', '');
+                    body.appendChild(el('strong', '', f.label));
+                    body.appendChild(el('small', '', 'Fix: ' + f.fix));
+                    it.appendChild(body);
+                    panel.appendChild(it);
+                });
+            } else {
+                panel.appendChild(el('div', 'ma-sub ok', '&#10004; All 15 checks passed — flawless on-page setup.'));
+            }
+
+            var actions = el('div', 'ma-actions');
+            var a1 = el('a', 'btn-x px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg', 'Want these fixed for real? Free audit →');
+            a1.style.background = 'linear-gradient(90deg, #4f46e5, #06b6d4)';
+            a1.href = 'contact.html';
+            var a2 = el('a', 'btn-x px-6 py-3 rounded-xl border-2 font-bold text-sm', 'See how I audit full sites (SEO_skp) &#8599;');
+            a2.style.borderColor = '#c7d2fe';
+            a2.style.color = '#4f46e5';
+            a2.href = 'https://github.com/drwasimahmadkhan/SEO_skp';
+            a2.setAttribute('target', '_blank');
+            a2.setAttribute('rel', 'noopener');
+            actions.appendChild(a1); actions.appendChild(a2);
+            panel.appendChild(actions);
+            panel.appendChild(el('small', 'ma-fineprint', 'Runs 100% in your browser — nothing is stored. Based on Google best-practice rules, not a Google product.'));
+
+            out.appendChild(panel);
+            out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        var busy = false;
+        function analyze(raw) {
+            if (busy) return;
+            raw = (raw || '').trim();
+            if (!raw) {
+                out.innerHTML = '';
+                out.appendChild(el('p', 'ma-msg', 'Enter a website or page URL first — e.g. yourbusiness.com'));
+                out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                return;
+            }
+            if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+            var urlObj;
+            try { urlObj = new URL(raw); }
+            catch (e) {
+                out.innerHTML = '';
+                out.appendChild(el('p', 'ma-msg', 'That does not look like a valid website address.'));
+                return;
+            }
+
+            busy = true;
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            busyMsg(urlObj);
+
+            // Hybrid engine: full-HTML chain and Microlink metadata race in
+            // parallel — always prefer the deeper HTML result if it lands.
+            var htmlP = fetchHtml(urlObj.href).then(function (html) {
+                return { kind: 'full', html: html };
+            });
+            var metaP = fetchMetadata(urlObj.href).then(function (data) {
+                return { kind: 'meta', data: data };
+            });
+
+            htmlP
+                .catch(function () { return Promise.reject(new Error('no html')); })
+                .catch(function () {
+                    return metaP;
+                })
+                .then(function (res) {
+                    if (res.kind === 'full') {
+                        var doc = new DOMParser().parseFromString(res.html, 'text/html');
+                        renderResult(urlObj, doc, false);
+                    } else {
+                        renderMetaResult(urlObj, res.data);
+                    }
+                })
+                .catch(function () {
+                    blockedPanel(urlObj);
+                })
+                .finally(function () {
+                busy = false;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            });
+        }
+
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            analyze(input.value);
+        });
+
+        // Carry-over: auto-run when the URL arrives from the Instant Checkup (?url=…)
+        try {
+            var carried = new URLSearchParams(window.location.search).get('url');
+            if (carried) {
+                input.value = carried;
+                analyze(carried);
+            }
+        } catch (e) {}
+    })();
+    </script>
+</body>
+</html>

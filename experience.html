@@ -1,107 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Experience — Amina Shehzadi, SEO Expert</title>
-<meta name="description" content="Professional experience of Amina Shehzadi: freelance SEO & web developer, UI/UX intern at devxui, and SEO executive trainee at Corvit Systems.">
-<link rel="canonical" href="https://aminashehzadi393.github.io/portfolio/experience.html">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Experience — Amina Shehzadi, SEO Expert">
-<meta property="og:description" content="Freelance developer, UI/UX intern, SEO trainee — professional experience.">
-<meta property="og:url" content="https://aminashehzadi393.github.io/portfolio/experience.html">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Experience — Amina Shehzadi, SEO Expert">
-<meta name="twitter:description" content="Freelance developer, UI/UX intern, SEO trainee — professional experience.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience — Amina Shehzadi, SEO Expert</title>
+    <meta name="description" content="Professional experience of Amina Shehzadi: freelance SEO & web developer, UI/UX intern at devxui, and SEO executive trainee at Corvit Systems.">
+    <link rel="canonical" href="https://aminashehzadi393.github.io/portfolio/experience.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Experience — Amina Shehzadi, SEO Expert">
+    <meta property="og:description" content="Freelance SEO developer, UI/UX intern, SEO trainee — professional experience.">
+    <meta property="og:url" content="https://aminashehzadi393.github.io/portfolio/experience.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Experience — Amina Shehzadi, SEO Expert">
+    <meta name="twitter:description" content="Freelance SEO developer, UI/UX intern, SEO trainee — professional experience.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] } } } };
+    </script>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="antialiased selection:bg-indigo-600 selection:text-white" style="background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F0FDFA 100%); color: #0F172A;">
 
-<nav class="nav">
-  <div class="wrap nav-inner">
-    <a class="logo" href="index.html">Am<span class="i-glyph" aria-hidden="true"><span class="i-stem"></span><span class="i-tittle"></span></span>na<span class="logo-blip" aria-hidden="true"></span></a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">&#9728;</button>
-    <button class="burger" id="burger" aria-label="Menu">&#9776;</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="experience.html" class="active">Experience</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="contact.html" class="btn btn-primary nav-cta">Start a Project &rarr;</a></li>
-    </ul>
-  </div>
-</nav>
+    <div class="perspective-grid"></div>
+    <canvas id="bg-canvas"></canvas>
 
-<main>
-  <div class="wrap">
-    <header class="page-head reveal">
-      <span class="kicker">Track record</span>
-      <h1>Real Work, <span class="grad-text">Shipped to Production</span></h1>
-      <p class="lead">From client SEO to live web apps &mdash; every role ended in something live.</p>
-    </header>
+    <div class="relative z-10">
 
-    <div class="reveal">
-      <div class="xp-item amber-edge">
-        <div class="xp-head"><h3>Freelance SEO &amp; Web Developer</h3><span class="xp-date">2024 &ndash; Present</span></div>
-        <div class="xp-org">Self-employed &mdash; Remote</div>
-        <ul>
-          <li>Shipped 3 live web projects: RankCheck (SEO analyzer), FoodExpress (delivery web app), PaperMaker (test generator) — all SEO-optimized and open source.</li>
-          <li>Client SEO work: keyword research, on-page optimization and technical audits for live business websites (Toronto Airport Limo Taxi, ARKYC Services).</li>
-          <li>Co-built SEO_skp, a full-stack SEO/AEO/GEO audit platform with a real crawler and PDF reporting.</li>
-          <li>Build responsive, performance-focused websites with clean, maintainable code.</li>
-        </ul>
-      </div>
+        <header class="fixed w-full top-0 z-50 glass-nav-light">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <a href="index.html" class="font-display text-2xl font-bold tracking-tight flex items-center select-none group">
+                    <span class="logo-mark">A</span>
+                    <span class="text-slate-900">Am</span><!--
+                    --><span class="i-stem-wrapper text-slate-900">
+                        <span class="i-dot-3d"></span>
+                        <span class="i-dot-shadow"></span>
+                        <span>&#305;</span>
+                    </span><!--
+                    --><span class="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">na</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-7 text-sm font-semibold text-slate-600">
+                    <a href="index.html" class="hover:text-indigo-600 transition">Home</a>
+                    <a href="about.html" class="hover:text-indigo-600 transition">About</a>
+                    <a href="projects.html" class="hover:text-indigo-600 transition">Projects</a>
+                    <a href="experience.html" class="text-indigo-600">Experience</a>
+                    <a href="contact.html" class="hover:text-indigo-600 transition">Contact</a>
+                </nav>
+                <div class="hidden md:flex items-center">
+                    <a href="contact.html" class="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-indigo-600 text-white font-semibold text-sm shadow-xl shadow-indigo-500/20 transition duration-300 transform hover:-translate-y-0.5">
+                        Start a Project <i class="fa-solid fa-arrow-right ml-1.5 text-xs"></i>
+                    </a>
+                </div>
+                <button id="burger" class="md:hidden text-slate-800 text-2xl" aria-label="Menu">&#9776;</button>
+            </div>
+            <div id="navLinks" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-6 py-5 space-y-3 text-sm font-semibold text-slate-700">
+                <a href="index.html" class="block py-1.5 hover:text-indigo-600">Home</a>
+                <a href="about.html" class="block py-1.5 hover:text-indigo-600">About</a>
+                <a href="projects.html" class="block py-1.5 hover:text-indigo-600">Projects</a>
+                <a href="contact.html" class="block text-center py-3 rounded-xl bg-indigo-600 text-white font-bold">Start a Project</a>
+            </div>
+        </header>
 
-      <div class="xp-item">
-        <div class="xp-head"><h3>UI/UX Intern</h3><span class="xp-date">Nov 2025 &ndash; Dec 2025</span></div>
-        <div class="xp-org">devxui &mdash; Remote, Bangladesh</div>
-        <ul>
-          <li>Designed wireframes and user interfaces for web projects.</li>
-          <li>Collaborated remotely with the team to improve usability and layout.</li>
-          <li>Applied UI/UX best practices to create clean, user-friendly designs.</li>
-        </ul>
-      </div>
+        <main class="pt-36 pb-24">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                    <span class="px-3.5 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase tracking-widest">Track Record</span>
+                    <h1 class="font-display text-4xl md:text-5xl font-bold text-slate-900 mt-4">Real Work, <span class="gradient-text-vivid">Shipped to Production</span></h1>
+                    <p class="text-slate-600 text-sm sm:text-base mt-3">From client SEO to live web apps — every role ended in something live.</p>
+                </div>
 
-      <div class="xp-item">
-        <div class="xp-head"><h3>SEO Executive (Trainee)</h3><span class="xp-date">Feb 2025 &ndash; May 2025</span></div>
-        <div class="xp-org">Corvit Systems &mdash; Lahore</div>
-        <ul>
-          <li>Completed 3 months of hands-on SEO training with practical implementation.</li>
-          <li>Worked on live SEO projects including Toronto Airport Limo Taxi and ARKYC Services.</li>
-          <li>Performed backlink creation, keyword research, and on-page optimization.</li>
-        </ul>
-      </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="scene-3d-wrap reveal">
+                        <div class="card-3d-light p-8 rounded-3xl h-full border-l-4 border-l-indigo-600">
+                            <span class="text-xs font-mono font-bold uppercase text-indigo-600 z-pop-sm">2024 — PRESENT</span>
+                            <h3 class="font-display text-xl font-bold text-slate-900 mt-2 mb-1 z-pop-lg">Freelance SEO &amp; Web Developer</h3>
+                            <p class="text-sm text-cyan-600 font-bold mb-4">Self-employed — Remote</p>
+                            <ul class="text-sm text-slate-600 space-y-2 z-pop-sm">
+                                <li>Shipped 3 live web projects: <b>RankCheck</b> (SEO analyzer), <b>FoodExpress</b>, <b>PaperMaker</b> — all SEO-optimized and open source.</li>
+                                <li>Client SEO work: keyword research, on-page optimization and technical audits for live business websites (Toronto Airport Limo Taxi, ARKYC Services).</li>
+                                <li>Co-built <b>SEO_skp</b>, a full-stack SEO/AEO/GEO audit platform with a real crawler and PDF reporting.</li>
+                                <li>Build responsive, performance-focused websites with clean, maintainable code.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="scene-3d-wrap reveal">
+                        <div class="card-3d-light p-8 rounded-3xl h-full border-l-4 border-l-cyan-500">
+                            <span class="text-xs font-mono font-bold uppercase text-cyan-600 z-pop-sm">NOV 2025 — DEC 2025</span>
+                            <h3 class="font-display text-xl font-bold text-slate-900 mt-2 mb-1 z-pop-lg">UI/UX Intern</h3>
+                            <p class="text-sm text-cyan-600 font-bold mb-4">devxui — Remote, Bangladesh</p>
+                            <ul class="text-sm text-slate-600 space-y-2 z-pop-sm">
+                                <li>Designed wireframes and user interfaces for web projects.</li>
+                                <li>Collaborated remotely with the team to improve usability and layout.</li>
+                                <li>Applied UI/UX best practices to create clean, user-friendly designs.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="scene-3d-wrap reveal">
+                        <div class="card-3d-light p-8 rounded-3xl h-full border-l-4 border-l-purple-600">
+                            <span class="text-xs font-mono font-bold uppercase text-purple-600 z-pop-sm">FEB 2025 — MAY 2025</span>
+                            <h3 class="font-display text-xl font-bold text-slate-900 mt-2 mb-1 z-pop-lg">SEO Executive (Trainee)</h3>
+                            <p class="text-sm text-cyan-600 font-bold mb-4">Corvit Systems — Lahore</p>
+                            <ul class="text-sm text-slate-600 space-y-2 z-pop-sm">
+                                <li>Completed 3 months of hands-on SEO training with practical implementation.</li>
+                                <li>Worked on live SEO projects including Toronto Airport Limo Taxi and ARKYC Services.</li>
+                                <li>Performed backlink creation, keyword research, and on-page optimization.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-20 reveal">
+                    <h2 class="font-display text-3xl md:text-4xl font-bold text-slate-900">Want the full picture?</h2>
+                    <p class="text-slate-600 text-sm mt-3 mb-6">Download the CV for the complete record.</p>
+                    <a href="assets/Amina-Shehzadi-CV.pdf" download class="inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold shadow-xl shadow-indigo-500/30 transition transform hover:-translate-y-1"><i class="fa-solid fa-file-arrow-down mr-2"></i> Download Full CV (PDF)</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="border-t border-slate-200/80 py-10 bg-white/60 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <a href="index.html" class="font-display text-xl font-bold tracking-tight flex items-center">
+                    <span class="logo-mark" style="width:2rem;height:2rem;">A</span>
+                    <span class="text-slate-900">Am</span><!--
+                    --><span class="i-stem-wrapper text-slate-900">
+                        <span class="i-dot-3d"></span>
+                        <span class="i-dot-shadow"></span>
+                        <span>&#305;</span>
+                    </span><!--
+                    --><span class="text-indigo-600">na</span>
+                </a>
+                <div class="text-xs font-medium text-slate-500">&copy; <span id="year">2026</span> Amina Shehzadi — SEO Expert</div>
+                <div class="text-xs font-medium text-slate-500 flex gap-4">
+                    <a href="https://www.linkedin.com/in/amina-shehzadi-seo-digital-marketing-webdevelopment/" class="hover:text-indigo-600" target="_blank" rel="noopener">LinkedIn</a>
+                    <a href="https://github.com/aminashehzadi393" class="hover:text-indigo-600" target="_blank" rel="noopener">GitHub</a>
+                    <a href="mailto:aminashehzadi393@gmail.com" class="hover:text-indigo-600">Email</a>
+                </div>
+            </div>
+        </footer>
+
     </div>
 
-    <section class="block">
-      <div class="cta reveal">
-        <h2>Want the full picture?</h2>
-        <p>Download the CV for the complete record.</p>
-        <div class="cta-actions">
-          <a class="btn btn-violet" href="assets/Amina-Shehzadi-CV.pdf" download>&darr; Download full CV (PDF)</a>
-        </div>
-      </div>
-    </section>
-  </div>
-</main>
-
-<footer>
-  <div class="wrap footer-inner">
-    <span>&copy; <span id="year">2026</span> Amina Shehzadi &mdash; SEO Expert</span>
-    <span class="socials">
-      <a href="https://www.linkedin.com/in/amina-shehzadi-seo-digital-marketing-webdevelopment/">LinkedIn</a>
-      <a href="https://github.com/aminashehzadi393">GitHub</a>
-      <a href="mailto:aminashehzadi393@gmail.com">Email</a>
-    </span>
-  </div>
-</footer>
-
-<button id="toTop" aria-label="Back to top">&uarr;</button>
-<script src="app.js"></script>
-<script src="ai-chat.js"></script>
+    <button id="toTop" aria-label="Back to top">&uarr;</button>
+    <script src="app.js"></script>
+    <script src="ai-chat.js"></script>
 </body>
 </html>
