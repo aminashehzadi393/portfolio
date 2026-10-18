@@ -64,8 +64,8 @@
     },
     {
       name: 'education',
-      patterns: [/education/i, /degree/i, /universit/i, /college/i, /\bstud(y|ied|ies)\b/i, /qualification/i, /fsc/i],
-      reply: 'BS Computer Science, University of the Punjab, Lahore (2023\u2013Present), and FSc Pre-Engineering (2021\u20132023).'
+      patterns: [/education/i, /degree/i, /universit/i, /college/i, /\bstud(y|ied|ies)\b/i, /qualification/i, /\bpu\b/i, /\bfsc\b/i],
+      reply: 'She is pursuing her <b>BS Computer Science from the University of the Punjab (PU), Lahore</b> (2023\u2013Present) \u2014 a full 4-year CS degree. Non-degree experience aside, her real training comes from shipped projects.'
     },
     {
       name: 'experience',

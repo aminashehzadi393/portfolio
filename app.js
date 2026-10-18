@@ -128,11 +128,16 @@
           _subject: 'Portfolio contact: ' + name,
           _autoresponse: autoresp ? autoresp.value : ''
         })
-      }).then(function (r) { return r.json(); })
-        .then(function () {
-          note.textContent = 'Message sent! I will get back to you soon.';
-          note.className = 'form-note ok';
-          form.reset();
+      }).then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(function (j) {
+          if (j && j.success === true) {
+            note.textContent = 'Message sent! I will get back to you within a few hours.';
+            note.className = 'form-note ok';
+            form.reset();
+          } else {
+            note.innerHTML = 'Auto-send failed. Please <a href="mailto:aminashehzadi393@gmail.com?subject=Project%20Brief">email me directly</a> — I reply the same day.';
+            note.className = 'form-note err';
+          }
         })
         .catch(function () {
           note.textContent = 'Something went wrong. Please email me directly at aminashehzadi393@gmail.com.';
