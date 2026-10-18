@@ -8,7 +8,6 @@
   var LINKEDIN = 'https://www.linkedin.com/in/amina-shehzadi-seo-digital-marketing-webdevelopment/';
   var GITHUB = 'https://github.com/aminashehzadi393';
   var EMAIL = 'aminashehzadi393@gmail.com';
-  var CV = 'assets/Amina-Shehzadi-CV.pdf';
 
   function link(url, text) {
     return '<a href="' + url + '" target="_blank" rel="noopener">' + text + '</a>';
@@ -44,13 +43,13 @@
     },
     {
       name: 'roadmap',
-      patterns: [/roadmap/i, /llm\s*engineer(ing)?\s*road/i, /learning\s*road/i],
-      reply: 'Her LLM Engineering Roadmap is a public learning path: Python \u2192 PyTorch \u2192 RAG & AI agents, built in the open. Follow it: ' + link('https://github.com/aminashehzadi393/llm-engineering', 'GitHub')
+      patterns: [/roadmap/i, /learning\s*path/i, /how\s*to\s*(grow|learn|start)/i, /career\s*(path|advice)/i],
+      reply: 'Her SEO path: Technical SEO (crawl, index, Core Web Vitals) \u2192 On-page (titles, intent, internal links) \u2192 Off-page (white-hat links, digital PR) \u2192 GEO/AEO (AI discoverability). Everything she builds ships in the open: ' + link('https://github.com/aminashehzadi393', 'GitHub')
     },
     {
       name: 'cv',
-      patterns: [/\bcv\b/i, /resume/i, /\b biodata \b/i],
-      reply: 'Here is her CV: <a href="' + CV + '" download>Download PDF</a>'
+      patterns: [/\bcv\b/i, /resume/i, /\bbiodata\b/i],
+      reply: 'Instead of a PDF, see her work live — the <a href="projects.html">project portfolio</a>, the <a href="experience.html">experience timeline</a>, and the <a href="analyzer.html">free SEO analyzer</a> she built. For the full record, write to her: ' + link('mailto:' + EMAIL + '?subject=CV%20Request', EMAIL)
     },
     {
       name: 'contact',
