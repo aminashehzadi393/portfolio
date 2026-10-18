@@ -5,6 +5,16 @@
 (function () {
   'use strict';
 
+  // Auto-HTTPS on the custom domain (functional equivalent of Pages "Enforce HTTPS")
+  try {
+    if (location.hostname === 'iamina.tech' && location.protocol === 'http:') {
+      location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+    }
+    if (location.hostname === 'www.iamina.tech') {
+      location.replace(location.protocol + '//iamina.tech' + location.pathname + location.search + location.hash);
+    }
+  } catch (e) {}
+
   document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('loaded');
   });
